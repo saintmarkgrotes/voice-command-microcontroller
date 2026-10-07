@@ -9,6 +9,7 @@ const MESSAGES = {
     "⚠️ Unable to connect to the backend.\n\nPlease check your network connection.",
   TIMEOUT: "⚠️ The backend took too long to respond. Please try again.",
   UNAUTHORIZED: "⚠️ You are not signed in, or your session has expired.",
+  INVALID_CREDENTIALS: "⚠️ Incorrect username or password.",
   FORBIDDEN: "⚠️ You do not have permission to do that.",
   NOT_FOUND: "⚠️ The requested resource was not found.",
   CONFLICT:
