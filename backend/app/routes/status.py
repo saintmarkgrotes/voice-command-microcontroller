@@ -1,9 +1,12 @@
 from flask import Blueprint, current_app, jsonify
 
+from app.security.authentication import require_auth
+
 status_bp = Blueprint("status", __name__)
 
 
 @status_bp.get("/status")
+@require_auth()  # any signed-in user, admin or viewer
 def get_status():
     devices = current_app.extensions["device_state_service"].get_all()
     response = jsonify({"success": True, "devices": devices})

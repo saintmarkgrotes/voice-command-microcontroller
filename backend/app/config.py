@@ -24,5 +24,17 @@ class Config:
     # Commands are tiny; reject oversized bodies (Flask answers 413).
     MAX_CONTENT_LENGTH = 4096
 
-    # 64 hex characters. Secret: only ever read from the environment.
-    AES_SECRET_KEY = os.getenv("AES_SECRET_KEY", "")
+    # Secrets: only ever read from the environment.
+    AES_SECRET_KEY = os.getenv("AES_SECRET_KEY", "")  # 64 hex characters
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")  # 32+ characters, different from the AES key
+
+    # Users: "username|role|password_hash" entries separated by ";".
+    # Create entries with: python -m scripts.create_user
+    AUTH_USERS = os.getenv("AUTH_USERS", "")
+    ACCESS_TOKEN_TTL_SECONDS = int(os.getenv("ACCESS_TOKEN_TTL_SECONDS", "3600"))
+
+    # Rate limits (per client IP / username for login, per user for commands).
+    LOGIN_MAX_FAILURES = int(os.getenv("LOGIN_MAX_FAILURES", "5"))
+    LOGIN_WINDOW_SECONDS = int(os.getenv("LOGIN_WINDOW_SECONDS", "300"))
+    COMMAND_RATE_LIMIT = int(os.getenv("COMMAND_RATE_LIMIT", "30"))
+    COMMAND_RATE_WINDOW_SECONDS = int(os.getenv("COMMAND_RATE_WINDOW_SECONDS", "60"))

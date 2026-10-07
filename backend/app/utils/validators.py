@@ -1,5 +1,6 @@
 from app.constants import COMMAND_DEFINITIONS, DEVICES
 from app.errors import BadRequestError
+from app.security.authentication import MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH
 
 
 def _normalize(value, transform):
@@ -40,3 +41,26 @@ def validate_command_request(data):
         )
 
     return device, command
+
+
+def validate_login_request(data):
+    """Validate a POST /api/auth/login body. Returns (username, password).
+
+    Length limits also stop huge passwords from being fed to the slow hash function.
+    """
+    if not isinstance(data, dict):
+        raise BadRequestError("Request body must be a JSON object.")
+
+    username = data.get("username")
+    password = data.get("password")
+
+    if not isinstance(username, str) or not isinstance(password, str):
+        raise BadRequestError('Fields "username" and "password" are required strings.')
+
+    if not username.strip() or not password:
+        raise BadRequestError('Fields "username" and "password" must not be empty.')
+
+    if len(username) > MAX_USERNAME_LENGTH or len(password) > MAX_PASSWORD_LENGTH:
+        raise BadRequestError("Username or password is too long.")
+
+    return username, password

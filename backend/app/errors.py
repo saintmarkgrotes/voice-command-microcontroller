@@ -18,12 +18,13 @@ class ApiError(Exception):
     code = "INTERNAL_ERROR"
     message = "An internal error occurred."
 
-    def __init__(self, message=None, *, code=None, status_code=None):
+    def __init__(self, message=None, *, code=None, status_code=None, headers=None):
         self.message = message or self.message
         if code:
             self.code = code
         if status_code:
             self.status_code = status_code
+        self.headers = dict(headers or {})
         super().__init__(self.message)
 
 
@@ -96,15 +97,20 @@ _CODE_TO_MESSAGE = {
 }
 
 
-def error_response(code, message, status_code):
-    body = {"success": False, "error": {"code": code, "message": message}}
-    return jsonify(body), status_code
+def error_response(code, message, status_code, headers=None):
+    response = jsonify({"success": False, "error": {"code": code, "message": message}})
+    response.status_code = status_code
+    for name, value in (headers or {}).items():
+        response.headers[name] = value
+    return response
 
 
 def register_error_handlers(app):
     @app.errorhandler(ApiError)
     def handle_api_error(error):
-        return error_response(error.code, error.message, error.status_code)
+        return error_response(
+            error.code, error.message, error.status_code, error.headers
+        )
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(error):
