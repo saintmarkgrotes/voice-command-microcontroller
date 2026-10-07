@@ -2,8 +2,6 @@ import threading
 
 import pytest
 
-from app import create_app
-from app.config import Config
 from app.constants import COMMAND_DEFINITIONS
 from app.services.device_state_service import DeviceStateService
 from app.services.encryption_service import EncryptionError
@@ -14,12 +12,6 @@ INITIAL_DEVICES = {
     "door": {"state": "closed"},
     "pump": {"state": "off"},
 }
-
-
-class OtherAppConfig(Config):
-    TESTING = True
-    DEBUG = False
-    AES_SECRET_KEY = "cd" * 32
 
 
 def get_devices(client):
@@ -99,8 +91,12 @@ def test_post_on_status_is_not_allowed(client):
     assert response.get_json()["error"]["code"] == "METHOD_NOT_ALLOWED"
 
 
-def test_state_is_isolated_between_app_instances(client):
-    other_client = create_app(OtherAppConfig).test_client()
+def test_state_is_isolated_between_app_instances(client, app_factory):
+    other_app = app_factory(AES_SECRET_KEY="cd" * 32)
+    other_client = other_app.test_client()
+    other_client.environ_base["HTTP_AUTHORIZATION"] = client.environ_base[
+        "HTTP_AUTHORIZATION"
+    ]
     send(client, "light", "LIGHT_ON")
     assert get_devices(client)["light"]["state"] == "on"
     assert get_devices(other_client)["light"]["state"] == "off"
