@@ -4,6 +4,7 @@ export default function VoiceCommandButton({
   isListening = false,
   onPress,
   disabled = false,
+  listeningLabel = "Listening…",
 }) {
   return (
     <View className="items-center py-2">
@@ -26,7 +27,7 @@ export default function VoiceCommandButton({
         Voice Command
       </Text>
       <Text className="mt-1 text-sm text-slate-400">
-        {isListening ? "Listening…" : '"Tap to speak"'}
+        {isListening ? listeningLabel : '"Tap to speak"'}
       </Text>
     </View>
   );

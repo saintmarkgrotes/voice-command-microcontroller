@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -6,10 +5,13 @@ import CommandResult from "../components/CommandResult";
 import ConnectionStatus from "../components/ConnectionStatus";
 import DeviceCard from "../components/DeviceCard";
 import Header from "../components/Header";
+import MockVoiceInput from "../components/MockVoiceInput";
 import SectionCard from "../components/SectionCard";
 import SecurityStatus from "../components/SecurityStatus";
 import VoiceCommandButton from "../components/VoiceCommandButton";
+import VoiceFeedback from "../components/VoiceFeedback";
 import useDevices from "../hooks/useDevices";
+import useVoiceCommand from "../hooks/useVoiceCommand";
 
 export default function HomeScreen() {
   const {
@@ -20,29 +22,35 @@ export default function HomeScreen() {
     sendCommand,
     isMockMode,
   } = useDevices();
-  const [isListening, setIsListening] = useState(false);
 
-  // Mock voice input: "listens" for 2.5 seconds, then stops.
-  // Real speech recognition arrives in Phase 12.
-  useEffect(() => {
-    if (!isListening) return undefined;
-    const timer = setTimeout(() => setIsListening(false), 2500);
-    return () => clearTimeout(timer);
-  }, [isListening]);
+  // Voice and buttons share ONE command flow: a recognized phrase becomes a
+  // COMMAND_TYPES value and goes through sendCommand, exactly like a button press.
+  const voice = useVoiceCommand({ onCommand: sendCommand });
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView
         contentContainerClassName="px-4 pb-10"
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <Header />
 
         <SectionCard>
           <VoiceCommandButton
-            isListening={isListening}
-            onPress={() => setIsListening((current) => !current)}
+            isListening={voice.isListening}
+            onPress={voice.toggleListening}
+            disabled={isSending}
+            listeningLabel="Type your command below"
           />
+          {voice.isListening ? (
+            <MockVoiceInput
+              onSubmit={voice.submitTranscript}
+              onCancel={voice.stopListening}
+              disabled={isSending}
+            />
+          ) : null}
+          <VoiceFeedback feedback={voice.feedback} />
         </SectionCard>
 
         <SectionCard title="Device Control">
