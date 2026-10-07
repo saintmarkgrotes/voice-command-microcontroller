@@ -32,7 +32,7 @@ export default function CommandResult({ result, mock = false }) {
   const { command, commandId, encryptedPayload } = result;
 
   return (
-    <View>
+    <View accessibilityLiveRegion="polite">
       <Text className="text-sm font-semibold text-emerald-400">
         ✓ Command secured
       </Text>

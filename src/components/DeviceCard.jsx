@@ -5,7 +5,13 @@ import DeviceStatus from "./DeviceStatus";
 
 // `device` is a view model: { id, name, icon, state, tone, actions: [{ label, command, selected }] }.
 // The card never builds commands itself; it reports which COMMAND_TYPES value was pressed.
-export default function DeviceCard({ device, onCommand, disabled = false }) {
+// `pendingCommand` is the command currently being sent (if any); its button shows a spinner.
+export default function DeviceCard({
+  device,
+  onCommand,
+  disabled = false,
+  pendingCommand = null,
+}) {
   return (
     <View className="mb-3 rounded-xl bg-slate-800/60 p-4">
       <View className="flex-row items-center justify-between">
@@ -25,6 +31,7 @@ export default function DeviceCard({ device, onCommand, disabled = false }) {
             label={action.label}
             selected={action.selected}
             disabled={disabled}
+            loading={pendingCommand === action.command}
             onPress={() => onCommand(action.command)}
             accessibilityLabel={`${device.name} ${action.label}`}
           />

@@ -1,4 +1,4 @@
-import { ScrollView, Text } from "react-native";
+import { RefreshControl, ScrollView, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AccountStatus from "../components/AccountStatus";
@@ -7,6 +7,7 @@ import ConnectionStatus from "../components/ConnectionStatus";
 import DeviceCard from "../components/DeviceCard";
 import Header from "../components/Header";
 import MockVoiceInput from "../components/MockVoiceInput";
+import OfflineBanner from "../components/OfflineBanner";
 import SectionCard from "../components/SectionCard";
 import SecurityStatus from "../components/SecurityStatus";
 import VoiceCommandButton from "../components/VoiceCommandButton";
@@ -20,8 +21,11 @@ export default function HomeScreen() {
     devices,
     connection,
     isSending,
+    pendingCommand,
+    isRefreshing,
     lastResult,
     sendCommand,
+    onRefresh,
     isMockMode,
   } = useDevices();
   const { user, canControl, signOut } = useAuth();
@@ -36,11 +40,24 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView
-        contentContainerClassName="px-4 pb-10"
+        // max-w keeps the dashboard readable on tablets
+        contentContainerClassName="w-full max-w-xl self-center px-4 pb-10"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          // tintColor / colors / progressBackgroundColor are native props, not styles
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor="#22d3ee"
+            colors={["#22d3ee"]}
+            progressBackgroundColor="#0f172a"
+          />
+        }
       >
         <Header />
+
+        <OfflineBanner visible={connection === "disconnected"} />
 
         <SectionCard>
           <VoiceCommandButton
@@ -71,6 +88,7 @@ export default function HomeScreen() {
               device={device}
               onCommand={sendCommand}
               disabled={controlsDisabled}
+              pendingCommand={pendingCommand}
             />
           ))}
         </SectionCard>
