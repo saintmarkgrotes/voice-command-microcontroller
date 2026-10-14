@@ -23,7 +23,12 @@ export default function CommandResult({ result, mock = false }) {
 
   if (!result.ok) {
     return (
-      <View className="rounded-lg bg-rose-950 p-3" accessibilityRole="alert">
+      <View
+        accessible
+        accessibilityRole="alert"
+        accessibilityLiveRegion="assertive"
+        className="rounded-lg bg-rose-950 p-3"
+      >
         <Text className="text-sm text-rose-300">{result.message}</Text>
       </View>
     );

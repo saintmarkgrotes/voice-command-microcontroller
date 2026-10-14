@@ -54,6 +54,13 @@ export function createCommand(command, device) {
       ? COMMAND_DEFINITIONS[command].device
       : undefined);
 
+  // Without a known device the command itself is the problem: report it as such.
+  if (resolvedDevice === undefined && typeof command === "string") {
+    const error = new Error(`Unknown command: ${command}`);
+    error.code = "UNKNOWN_COMMAND";
+    throw error;
+  }
+
   const payload = { device: resolvedDevice, command };
   const result = validateCommand(payload);
 

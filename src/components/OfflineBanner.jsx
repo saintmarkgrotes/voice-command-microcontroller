@@ -7,8 +7,10 @@ export default function OfflineBanner({ visible = false }) {
 
   return (
     <View
-      className="mt-4 rounded-xl bg-rose-950 p-3"
+      accessible
       accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+      className="mt-4 rounded-xl bg-rose-950 p-3"
     >
       <Text className="text-sm font-semibold text-rose-300">
         ⚠️ Offline: showing the last known device states.
