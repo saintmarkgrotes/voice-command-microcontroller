@@ -1,41 +1,63 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+# Project rules for AI coding tools
 
-## Expo has changed — do not trust your training data
+This repository is a smart-home control system: a React Native (Expo) app in the repository
+root and a Flask API in `backend/`. Read `README.md` and `docs/` first. These rules override any
+generic Expo template advice.
 
-Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
+## Hard rules
 
-1. Read the major version of the `expo` package in `package.json`.
-2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
-3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
+1. **JavaScript only.** Never create `.ts` or `.tsx` files, TypeScript config, types, enums or
+   interfaces. Use `.js` / `.jsx`. Do not run or add `tsc`.
+2. **Navigation is React Navigation** (`src/navigation/AppNavigator.js`). Do **not** use Expo
+   Router and do not create `app/_layout` files or a `src/app/` routes folder. (`app/` holds
+   `config.js` and `AppProviders.js` only.)
+3. **Style only with NativeWind** `className`. No CSS files, StyleSheet styling, styled-components
+   or Emotion. Native-only props that cannot be classes (for example `placeholderTextColor`,
+   `ActivityIndicator color`, `RefreshControl` colors) are the only exception; comment them.
+4. **No secrets in the app.** The AES key lives only in `backend/.env`. `EXPO_PUBLIC_*` values are
+   visible in the bundle. Never store the login token in AsyncStorage; use
+   `src/services/tokenStorage.js` (SecureStore).
+5. **Never commit `.env` files or print secrets.** Do not read or paste the contents of
+   `backend/.env`. Only the `.env.example` templates are committed.
+6. **Keep the layers apart.** UI components make no network calls. Screens use hooks, hooks use
+   services, services use `src/api/`. Backend routes stay thin; logic lives in `services/`.
+7. **The backend is the authority.** Any check added to the app must also exist in the backend.
+8. **Do not implement ESP32 firmware** until Phase 19 asks for it.
 
 ## Commands
 
-Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
+```text
+npx expo install <package>      add a dependency (resolves SDK-compatible versions)
+npx expo start -c               run the app (clear the cache after .env changes)
+npm test                        app unit tests (Jest)
+npm run test:e2e                app against a live backend (needs env vars, see README)
+npx expo lint                   lint
 
-```bash
-npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
-npx expo lint               # lint
-npx tsc --noEmit            # typecheck
-npx expo-doctor             # diagnose dependency and config issues
-npx expo install --fix      # fix incompatible package versions
+cd backend
+venv\Scripts\Activate.ps1       activate the venv first (macOS/Linux: source venv/bin/activate)
+pytest -q                       backend tests
+python run.py                   run the API
 ```
 
-Run lint and typecheck before declaring any task done.
+Run the relevant tests and lint before declaring a task done.
 
-## Navigation & Routing
+## Expo version
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+Expo changes between SDK releases. Before using an Expo or React Native API you are unsure
+about, check the `expo` version in `package.json` and read the matching docs at
+`https://docs.expo.dev/versions/v<major>.0.0/` rather than answering from memory. Libraries with
+native code do not work in Expo Go unless Expo Go bundles them; use a development build.
 
-## Building with EAS
+## Shared vocabulary
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
+Devices, commands and their resulting states are defined twice and must stay identical:
+`src/constants/deviceConfig.js` (app) and `backend/app/constants.py` (backend). If you change one,
+change the other, plus `docs/api.md` and the tests.
 
-## Rules
+## When you change behavior
 
-- If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
-- Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+- Update the tests next to the code (`__tests__/` folders, `backend/tests/`).
+- Update `docs/api.md` for any endpoint or error change and `docs/security.md` for any security
+  change.
+- Voice parser changes need new cases in
+  `src/services/voice/__tests__/commandParser.test.js`; it must refuse when unsure.
