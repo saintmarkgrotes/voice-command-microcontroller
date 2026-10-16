@@ -1,0 +1,745 @@
+{
+  "aad": "smart-home-command-v1",
+  "description": "Test vectors for an ESP32 receiver of backend commands. See docs/esp32.md.",
+  "now": 1750000100,
+  "rules": {
+    "default_max_age_seconds": 30,
+    "door_open_max_age_seconds": 10,
+    "max_future_skew_seconds": 5,
+    "recent_ids_remembered": 32
+  },
+  "sequences": [
+    {
+      "messages": [
+        {
+          "envelope": {
+            "algorithm": "AES-256-GCM",
+            "ciphertext": "ddgAvv+8KVLxpST84vMjRQLPgW5B0PzMZY8pEVZ48VqIhuwszywWKF/v50A8FdClKXQKWYnIbhIOEyFpsyITrC54iDcwXUh2A8KcLCr0AeoE5f7kQb3kzPDHeA6HKTREqW4+89KYr/qf5wCgJkMYu6gQ",
+            "nonce": "AAAAAAAAAAAAAAAh",
+            "tag": "oxpPRaJmkNlgGqHXUQhAQg=="
+          },
+          "expect": {
+            "result": "accept"
+          },
+          "name": "first",
+          "now": 1750000100,
+          "plaintext": "{\"command\":\"DOOR_OPEN\",\"command_id\":\"00000000-0000-4000-8000-000000000900\",\"device\":\"door\",\"timestamp\":1750000100}"
+        },
+        {
+          "envelope": {
+            "algorithm": "AES-256-GCM",
+            "ciphertext": "/0uLW1LFRXig5N1LpZZE9crAM2bYqVY7DGiOqfBcsRiAmAw7iSOQcVB3GQ3FwSDkgyvUeCYbLNGWu3rdu5CuZ2UuBqbuV3bwvhzZJIbJn7Ya/kZv24TPgoJs8Ru5ZAjPTUsSZIaUrGpyphakLhnLL+9b",
+            "nonce": "AAAAAAAAAAAAAAAi",
+            "tag": "0gc6P9pwbyyX/gS2d7XV0w=="
+          },
+          "expect": {
+            "reason": "duplicate",
+            "result": "reject"
+          },
+          "name": "replay",
+          "now": 1750000100,
+          "plaintext": "{\"command\":\"DOOR_OPEN\",\"command_id\":\"00000000-0000-4000-8000-000000000900\",\"device\":\"door\",\"timestamp\":1750000100}"
+        }
+      ],
+      "name": "replayed_command_id_is_refused",
+      "note": "Same command_id, new nonce: the second copy must not run",
+      "now": 1750000100
+    },
+    {
+      "messages": [
+        {
+          "envelope": {
+            "algorithm": "AES-256-GCM",
+            "ciphertext": "S1eXnpOIXOPW5Y8AjN+maBBCjp3am1JqEmaYB2/fRLohFRx8o51fwlZ54SCJp10EC2lEUXqdN7m+XCFZpDOul6AnmmDSlq/pGOLZWxjXIOSLHzG7OBBw9DhAtGFbSMPKBNoEWfgAk50nItwfoblcfuHV",
+            "nonce": "AAAAAAAAAAAAAAAj",
+            "tag": "Pc1wBGt8mHiil49ZU5hh1g=="
+          },
+          "expect": {
+            "result": "accept"
+          },
+          "name": "a",
+          "now": 1750000100,
+          "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000901\",\"device\":\"light\",\"timestamp\":1750000100}"
+        },
+        {
+          "envelope": {
+            "algorithm": "AES-256-GCM",
+            "ciphertext": "/MehOC0evbBi0zyIYk3pMhcXkb5p2DHzHBfaSOofcyawvP+MFDxO1awlm6CUyHl+qWqov4RtAQ/MVkUiiB2kX+DYFzP9mq99Z5fTm8WdznWi0V3l1ZnTWMMpKjmkbQ8cc9VCEDRpe4nQDWjQ22vM6WRK",
+            "nonce": "AAAAAAAAAAAAAAAk",
+            "tag": "HrENbz8xrpfvXx+p8cGrUA=="
+          },
+          "expect": {
+            "result": "accept"
+          },
+          "name": "b",
+          "now": 1750000100,
+          "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000902\",\"device\":\"light\",\"timestamp\":1750000100}"
+        }
+      ],
+      "name": "same_command_with_new_ids_runs_twice",
+      "now": 1750000100
+    },
+    {
+      "messages": [
+        {
+          "envelope": {
+            "algorithm": "AES-256-GCM",
+            "ciphertext": "NtzkMbUHweJ0Z7dtXTUE2UBCjQ3e8Ig1fgJVikP1p56GsTLJ5GkzDCK10ArAe4OKH04sn86z95UuI8aviBTOHo7Xx+cHcg2bADxYTQrrdy9ziscK/hiBbNN6Xw==",
+            "nonce": "AAAAAAAAAAAAAAAl",
+            "tag": "eF1T6xXmRv/yW8Z5hvaQHg=="
+          },
+          "expect": {
+            "reason": "bad_plaintext",
+            "result": "reject"
+          },
+          "name": "rejected",
+          "now": 1750000100,
+          "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000903\",\"device\":\"light\"}"
+        },
+        {
+          "envelope": {
+            "algorithm": "AES-256-GCM",
+            "ciphertext": "RlYEX8Sqh3qK/3PVMzenHjY+CHa6Cyg8FkU8Ggm4IA76306u1u/8X/fERd9kpHxprTRGdA7V7LrKEw+jeD1XNCoateUhmxUh+s5lnQNjemYMEJP/pbQA/B8BWxq7RRh6dunUUYgUkB7thOLJNkASTSI5",
+            "nonce": "AAAAAAAAAAAAAAAm",
+            "tag": "Y/jiT+x8tKPkAzketScCZw=="
+          },
+          "expect": {
+            "result": "accept"
+          },
+          "name": "ok_afterwards",
+          "now": 1750000100,
+          "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000903\",\"device\":\"light\",\"timestamp\":1750000100}"
+        }
+      ],
+      "name": "a_rejected_message_does_not_use_up_its_id",
+      "note": "An id is remembered only when the message was accepted",
+      "now": 1750000100
+    }
+  ],
+  "test_key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "vectors": [
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "bvTckymZUXBqDGsboO99v0HAUxpGnnbnHG1uuEhULDdetF3TGBy0DGnv8zFB1DcDHjtnos3eMH+OJS1IaIWrODRBVcohea336IcW1SVP8Yqxh+A1GDfncLfb4UJANQVsP4PAVyz5zPQx10CoC9o+R3Nn",
+        "nonce": "AAAAAAAAAAAAAAAB",
+        "tag": "iLuK0MRHibTGD0a2wmgvvA=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_light_on",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000001\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "slNNEtkmu7/dLwYzOwisxNJIepaoiyON7RI/VxC1P9uNR9v1BFEY1Cn70gCiTqqSSjc8LZCwggjJ7LMQPVNH2rt2ZOHDKcYQSQ26WDIYoa9fiWgpnkM7Po1OD55kZsjMon3pfpEuOJWhMDI+sCOAZSNSHQ==",
+        "nonce": "AAAAAAAAAAAAAAAC",
+        "tag": "O/ksNeg2CVIXw4SKk6r6Dw=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_light_off",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_OFF\",\"command_id\":\"00000000-0000-4000-8000-000000000002\",\"device\":\"light\",\"timestamp\":1750000099}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "dgZt3Dsb0LTXsK1d7UQw3kXN03FlQWkiTFhJDrp9AHTXDFozjAaY9fXYHuzn0OXd8dX06N4H/FRukQOUDaym/B0ihL3+wGckkY+QYY2fMZzLQvd078uEzQF+h/rI5RS4ADgW6YkcXEmWTH1oN3w=",
+        "nonce": "AAAAAAAAAAAAAAAD",
+        "tag": "KMipaYcNmWVd8yJ0EtnXgQ=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_fan_on",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"FAN_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000003\",\"device\":\"fan\",\"timestamp\":1750000098}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "YGqubuScOnPj7y2Yac8A4py+wzZt8ZsI4OMgsgioQH4QLuS/XEsjRcdKC5U/yTQYoRxLg1AcctRkcQki2jKE1OIGi5YkdjQNuoXjKKxSf3kW+upCIBhh+Y/9g86qm+vl9AMhYQxpJ1HFDdan6CTH",
+        "nonce": "AAAAAAAAAAAAAAAE",
+        "tag": "dL5yt3yVhi4KjypjNtPCWw=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_fan_off",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"FAN_OFF\",\"command_id\":\"00000000-0000-4000-8000-000000000004\",\"device\":\"fan\",\"timestamp\":1750000097}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "44OhDa7T9CMMcHPTAbgasERLd7M/WRhPS7AAT2fRPuXa7iN14D1Q0InsbRXWPkPduwcraKZ00ev8T0l3xbe+EGjRdkH2LyOM3y3I/VjOLTu28ZBK61vl6+Oh54FtnL1VD/esgck7oQ6aHmmO6iA5Uu9y",
+        "nonce": "AAAAAAAAAAAAAAAF",
+        "tag": "N62sCyt/M4Y3Vw7VGcrRJw=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_door_open",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"DOOR_OPEN\",\"command_id\":\"00000000-0000-4000-8000-000000000005\",\"device\":\"door\",\"timestamp\":1750000096}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "9v3igWF3JK931n90hN1uvwTHWQDI+IDMHgfReB0TT4KGNxMX3FWOMCec5jtJlEJKYv/8J8F+n76hQJ0wTyQsmQkzdQjI7MRp2rtX7Jh03KCGkR2ZBCOvtYhgvrlJqKZYkSZdqJWUyPvPDLn56XczJwltcA==",
+        "nonce": "AAAAAAAAAAAAAAAG",
+        "tag": "SfgY/RdwvYzsuIcb6py4zg=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_door_close",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"DOOR_CLOSE\",\"command_id\":\"00000000-0000-4000-8000-000000000006\",\"device\":\"door\",\"timestamp\":1750000095}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "m09wcHp6P5SgfdUNYwH8NCRPjqRHR0aJqIfkj/IA1vnujTGLSOvqFZdjqv1xMuF2w4WCrwa2zCRyPEZv7tAiPXsN+BgAKeTrUfeaBkPZsybcczn8Mjvg/NLmdskjhhNinE/s3E6eBMre6909czv+0w==",
+        "nonce": "AAAAAAAAAAAAAAAH",
+        "tag": "8YoBRgfWPyYEzOxhXLfC1g=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_pump_on",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"PUMP_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000007\",\"device\":\"pump\",\"timestamp\":1750000094}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "GfIenxoT77HjI6e5VNdn6Y8VCAEOhmESlXXa6e32fSRVUVy2jD/yokYWpascWFcPF2eMGuoUJpCz/MFDTW9YhriCZFW7Q1esYtmKxncCz0lrJWjxO4V77ghIYDXG4LZ11st+iGwwctms1Hya6PmKlK0=",
+        "nonce": "AAAAAAAAAAAAAAAI",
+        "tag": "3UixovSsHrOyBYtWoG7Lig=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_pump_off",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"PUMP_OFF\",\"command_id\":\"00000000-0000-4000-8000-000000000008\",\"device\":\"pump\",\"timestamp\":1750000093}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "TbDaSVOvv+HktvLG/av66D7ZUGIKnnBNb2Q++zalE/cjxErNWhPqui+y8qx8AaSA0iE7c2ql9Bw6psox7LsEAOvIBGK19Yt1jkq37j76AxmcFV2WFLooCSC87LE2OY1uM1NoZ5OSyCef5/6umpfvldme",
+        "nonce": "AAAAAAAAAAAAAAAJ",
+        "tag": "4cxwKT2Z/DSyrcs30wK58w=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_light_on_age_30_boundary",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000009\",\"device\":\"light\",\"timestamp\":1750000070}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "IKBKemY7rMy/+pC/QkzF9z6+/EO9MsVuKljHusoJUaDc3hK9JFBwsDBPJAEfxwfKdifDrPeL6uuKH/XGpXNuBSRh84ka7wy7T07CTKTgvR9+Sj6/3yZv3FoPs/UjaN0S3lRElEfdKUWBP/cHu6NVYhFr",
+        "nonce": "AAAAAAAAAAAAAAAK",
+        "tag": "IXaOkraXVh1IZdA4iKVPOw=="
+      },
+      "expect": {
+        "reason": "stale",
+        "result": "reject"
+      },
+      "name": "reject_light_on_age_31",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000010\",\"device\":\"light\",\"timestamp\":1750000069}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "nzM80vI1j48MFWtH9HHgj0CJZOWuTyw/XLH6wxeHHQzvBAWGraL7eOmtJZK6p2P39cIrWqO0txBBNzfI6+3LUCWdx/lRMnP/dyjSQaMW6dqTBVNHFMqRaqXc5VUXFBm7VzRfqof0/wXl6X+kVo5pg9ND",
+        "nonce": "AAAAAAAAAAAAAAAL",
+        "tag": "HPHFWMfuSU3zOi0+txGpKQ=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_door_open_age_10_boundary",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"DOOR_OPEN\",\"command_id\":\"00000000-0000-4000-8000-000000000011\",\"device\":\"door\",\"timestamp\":1750000090}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "UCsYW7auP76Qlr+RrASAgcGGu3pFlhWzG/tMVrwrg/JxsZXu4xf9DzQRoNrab1CA5ZEth9TNC6Z2ynR+s9A4za7RPIJaHWwuHaniFb/0w2vLTHbirpnwj3SHKr2lLyaWZqlYoigg4zm+DgpwUefoNF3J",
+        "nonce": "AAAAAAAAAAAAAAAM",
+        "tag": "xqKu29Rg6bz6hVeFe/mGpQ=="
+      },
+      "expect": {
+        "reason": "stale",
+        "result": "reject"
+      },
+      "name": "reject_door_open_age_11",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"DOOR_OPEN\",\"command_id\":\"00000000-0000-4000-8000-000000000012\",\"device\":\"door\",\"timestamp\":1750000089}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "ZMLbwGOiU5YiCAe6f7v0vds58FCO1wRctGF5mYOCe+2Gu7Rvdm6ugsBcQbrNC2jdSrzMTZxKYEKSm5/G5GlCYBuaU4/ICLKGsaFKnTJch+PH9n7VjRtOqYftVpkWllf6Q5j4lMMeW94g1QPQ6I07lyPgCg==",
+        "nonce": "AAAAAAAAAAAAAAAN",
+        "tag": "kh+1u/42V2By10ONkZvm5g=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_door_close_age_25",
+      "note": "Only DOOR_OPEN uses the strict window",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"DOOR_CLOSE\",\"command_id\":\"00000000-0000-4000-8000-000000000013\",\"device\":\"door\",\"timestamp\":1750000075}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "jK1stnj7G6NIyu8tC2wlNeTKxJDqgeHFBDgptlpVUT9FMoGPJWg7WEmmDW4S1qCsBsxkx3dUGKnBycl1a2Mt1xkNgdWTyIq63hCjBugTjLgh46ZZwyJSKWrsigMHkNzG6Bhukls+P61ogyIlY7m0CVZn",
+        "nonce": "AAAAAAAAAAAAAAAO",
+        "tag": "IOL019K6/o52dM2+Le22fg=="
+      },
+      "expect": {
+        "result": "accept"
+      },
+      "name": "accept_future_skew_5",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000014\",\"device\":\"light\",\"timestamp\":1750000105}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "RHb/xiOf9LzyxmSdNg4YzRKxfd2tMlzi4uwCPesllGGovvW4mSq+EjUrAFGJBorMF+ucYBzG3wdOJj2eJufytGwA8EQF4x67bIJXps9ZjMhWGW4KuGHESbZM1euP7iEVpCFoCswEx0i0zoWCB0/SXKj5",
+        "nonce": "AAAAAAAAAAAAAAAP",
+        "tag": "CfXlrY8RNtH3u6xng4HWaw=="
+      },
+      "expect": {
+        "reason": "future",
+        "result": "reject"
+      },
+      "name": "reject_future_6",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000015\",\"device\":\"light\",\"timestamp\":1750000106}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "fWbLKuFiZQut0QGwCKfnNmlk/P7mKrajRfzwgP1NZPiY1Mpigs2G2iXzuzC4ZnK7870l5YEGhbLprX6Paji5lrVjAe/gF3SESpkhMpg6evBxvypW6cR6y3LriCtT2iecVaLrVtGueWXBSil+aMstnTcz",
+        "nonce": "AAAAAAAAAAAAAAAQ",
+        "tag": "Y5FbilIej2sNJe7bjmurng=="
+      },
+      "expect": {
+        "reason": "no_trusted_time",
+        "result": "reject"
+      },
+      "name": "reject_no_trusted_time",
+      "note": "The device clock has not been synchronized: refuse everything",
+      "now": null,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000016\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "x0FCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "auth_failed",
+        "result": "reject"
+      },
+      "name": "reject_tampered_ciphertext",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CVDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "auth_failed",
+        "result": "reject"
+      },
+      "name": "reject_tampered_tag",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AQAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "auth_failed",
+        "result": "reject"
+      },
+      "name": "reject_tampered_nonce",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCk=",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "auth_failed",
+        "result": "reject"
+      },
+      "name": "reject_truncated_ciphertext",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "lojP/DUtKYnlCmANhqBrAoP71qzeliRoQ0YLah7tWBvzdTRlYSyKrZ7zz2S7slXszz4PzXfl4p4Q3ZJl4wuduRvgjfvenn4+KlpYdfcbiQ4L+XyVNgHtfakV3xucSn/lW2y/U5L9pySwvgTju2AHXfcj",
+        "nonce": "AAAAAAAAAAAAAAAS",
+        "tag": "JO3Upo8qAX271hWwFKEFZw=="
+      },
+      "expect": {
+        "reason": "auth_failed",
+        "result": "reject"
+      },
+      "name": "reject_wrong_aad",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000017\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "9CHgJmn8JspWV5+fyA+oXiMiAnnO1f2hSCf/Em5ZeE4ju1Q7xtlsGpi0xMLxqvgqVift364M9sRLPV3N0wDFst8I5GX2i1vX87eSPI16aF7cTtGANHNYrYI0kztY1NqNgYrTFgibydc6+9UcowwkleBj",
+        "nonce": "AAAAAAAAAAAAAAAT",
+        "tag": "mz/2EYotlTQmNnyVGFgqwA=="
+      },
+      "expect": {
+        "reason": "auth_failed",
+        "result": "reject"
+      },
+      "name": "reject_wrong_key",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000017\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-128-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "bad_envelope",
+        "result": "reject"
+      },
+      "name": "reject_wrong_algorithm",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AAAAAAAAAAAAAAAR"
+      },
+      "expect": {
+        "reason": "bad_envelope",
+        "result": "reject"
+      },
+      "name": "reject_missing_tag",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "extra": "x",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "bad_envelope",
+        "result": "reject"
+      },
+      "name": "reject_extra_field",
+      "note": "The envelope has exactly four fields",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": 12345,
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "bad_envelope",
+        "result": "reject"
+      },
+      "name": "reject_nonce_not_a_string",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "!!!not-base64!!!",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "bad_encoding",
+        "result": "reject"
+      },
+      "name": "reject_invalid_base64_nonce",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AAAAAAAAAAA=",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "bad_length",
+        "result": "reject"
+      },
+      "name": "reject_short_nonce",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "xkFCrWdudZUFFVZJjTwA15z4y5TLa9TAqjbqTGBtQ/BBatb9HW086fU8XaCYPXff2IGrYCdLPTowXf6tjNuAOC87VOqaj8bISXCcfWiT2H03tvwlUJpDleEklNCXuCAX7SueFqbWMPDj1+qhH5V7NCnL",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7E="
+      },
+      "expect": {
+        "reason": "bad_length",
+        "result": "reject"
+      },
+      "name": "reject_short_tag",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "",
+        "nonce": "AAAAAAAAAAAAAAAR",
+        "tag": "CFDHufSKB7Hx6Q+hTHb38g=="
+      },
+      "expect": {
+        "reason": "bad_length",
+        "result": "reject"
+      },
+      "name": "reject_empty_ciphertext",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "iQPWTnMY1CYi3xwvwpZuR6k1IlttJ3D1U/Dps89+0To/kiDiut+rFoGCvJinGuxx02vKCtMZyI1C1iFrS1pG46++Fv3kqIm1zJn3nihP1LZ8kjD9sDb9pK6Oiozh70sjc/NjOWsYaIxppknxuzLW4qPoop1QMZivZXgK+rcCKf4QIs20U6xxHGBvr06CsiVOoZ15kItZkTjaGHMPnVKknCw7QegWl4Zb5XEh5qcjynJaKtpb8opvEFjCqFZnEqWYFRQYuoiumRwjp9biC0OgJy5cTu7TqqBQ8YrNY7ONWzouPzHtm9ZIEVTNf0YZ35EC2fY0xBfZz3ev6uZmup1RubFprYF9mGl2bkOVkaAsMtgC++qOv/fAt4zksNld71nxquLq/c2RDPyCjbyW",
+        "nonce": "AAAAAAAAAAAAAAAU",
+        "tag": "DQSEqQlbkUvWFYWiEA5UbQ=="
+      },
+      "expect": {
+        "reason": "bad_length",
+        "result": "reject"
+      },
+      "name": "reject_oversized_ciphertext",
+      "note": "Ciphertext above 256 bytes is refused before decrypting",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "AVe5m9P7DXk=",
+        "nonce": "AAAAAAAAAAAAAAAV",
+        "tag": "ks8d+Ob4aGX4S4GcpKdHzg=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_plaintext_not_json",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "Wr2fJPO9Wg==",
+        "nonce": "AAAAAAAAAAAAAAAW",
+        "tag": "Jm5Cma9QFzVKawpZtE096Q=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_plaintext_is_array",
+      "now": 1750000100
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "m/Tb37vD5n7pzlDZWBCMlZYPWhA7+LJe1EG7Suaav3ci7Qu60rzNWttKjBMtjEB2vp9iFiMxtRdhFJqNZP2fGyYJ82L87TAGapc0vvdZl0oLduN9Fk0DyaRsHw==",
+        "nonce": "AAAAAAAAAAAAAAAX",
+        "tag": "MkPZu0zgLxHliBbx6nrwvg=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_missing_timestamp",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000023\",\"device\":\"light\"}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "uf+UnvIh8TnrXQJN0cwcqM/jSzDxHBNhEYqXA9Sg1M21K8wwCCjgbXPX9rRH71yuSaVBGYdO7oRHzpSBtBxeJoKLg7n7Q45k1jbwb7eUFgjG5aorSsVlyQvZsVYDh0RMImshNpcLSRqBFruQDNl2TYg9675MIv22N74Yg4xR",
+        "nonce": "AAAAAAAAAAAAAAAY",
+        "tag": "JLH26SJHAfxKBv3bCswSbA=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_extra_plaintext_key",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000024\",\"device\":\"light\",\"extra\":\"x\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "wJ9G/IVAnJNtEYkcdBE2po3H89h1UGMNvp5LNdWpf5tFI9MSK2TWEp6zWxguKkR/JchqxCMTOkQvnGqHy0v90M47vnDDBIyf1y7tn38R4fcdDD1z3KbVX1R3DoXQnuY+5JamLvQPfQUjD9fR5GqW9QIHyCM=",
+        "nonce": "AAAAAAAAAAAAAAAZ",
+        "tag": "2F3Xz94A7jvhj2rXnFeMag=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_timestamp_is_text",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000025\",\"device\":\"light\",\"timestamp\":\"1750000100\"}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "2nB6MdrBAbbefwrdBcyFGBWGtbWbYokk2pv69qRchEAAxXAiqQcy7LFsjeVhTBTQBEukpUNjCtnKAiXEhz4tXazrep4A59KDlSAhHzkhF67z7R7vWOtwPwIaQX8T/X9rcZvcDr+f7riSUkgWSRIfAdf/n2I=",
+        "nonce": "AAAAAAAAAAAAAAAa",
+        "tag": "oDjyHwrPofstrDUAyW0yjw=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_timestamp_is_fraction",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000026\",\"device\":\"light\",\"timestamp\":1750000100.5}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "bO7ssmDK2jTlzvQHh4A6SwX5ntPGDImcB/fuwSgRr3MVa8WO9vSF7x9C1lryYSdRLQuxin0+QLFKPo+OdJjLxZhuHgPQ2jcmPtYCJrJT",
+        "nonce": "AAAAAAAAAAAAAAAb",
+        "tag": "8VrEnrRlVtLVs7i0CBFGWQ=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_empty_command_id",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "HgznBW/7iscWWjy1MEhkuM9o7D/Ju7emrAYe2qUTU/Q6KCUsOOz+SyOluXtBNWysuR8BDbQRXCB+meEOntjKjWwYjnpIyL/c4SVTAgfiY9s1JB+htg5+Fc/VaTYPn3gaTVDDFCPqGWAd+QI2hOpwJ8SIgzfC7lsGD5azfX5Lm2G/dr4TcdeYJrBH7h8u2qU=",
+        "nonce": "AAAAAAAAAAAAAAAc",
+        "tag": "JRAY6x8dd3YeCPfmslBwug=="
+      },
+      "expect": {
+        "reason": "bad_plaintext",
+        "result": "reject"
+      },
+      "name": "reject_command_id_too_long",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "0GG51wVwsUAomb+Cv0jmxPs7G4dJpmPriLPSsYtS9yuiMjxBFmNZyUk7jIOVWtVzstWgG0FcbNhEjmGJZnpzdeEuuH47rdSOIn33kBgC4Riwc8Z/FOvT7lvtCUvkvO1oruiWVm4NgqiuuhArxtnnQK63hg==",
+        "nonce": "AAAAAAAAAAAAAAAd",
+        "tag": "OyWHoJKQDRw0aU5WUD6oBg=="
+      },
+      "expect": {
+        "reason": "unknown_command",
+        "result": "reject"
+      },
+      "name": "reject_unknown_command",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_DIM\",\"command_id\":\"00000000-0000-4000-8000-000000000029\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "KRtH2PGXkDieIThVUJkeh7xPjoiVSv2MOFr6GfP7/8ES0yt+17DAj/F3vpSVzTF80m9IDTaHCod4Tnrmsg6ebHdx3CrbuNWU9XYRFYzeCBDcgcrgtmFLDaHztAJh0sDyZotQPQBnc5QHHvJxMOZT14o8",
+        "nonce": "AAAAAAAAAAAAAAAe",
+        "tag": "gaiM3Dnb1w8dWfoq3i3HhQ=="
+      },
+      "expect": {
+        "reason": "unknown_command",
+        "result": "reject"
+      },
+      "name": "reject_lowercase_command",
+      "note": "The device does not normalize case",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"light_on\",\"command_id\":\"00000000-0000-4000-8000-000000000030\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "7URzaHBgpZIf3cplYbMaFvHoz3ZKTlliE4bz5crNqKNtX9DS7RUJsq7/w6QY+RUBeMzbehrHtYDH6jWwGELBfjGwxKvYS9xsALdLqJudKA/8hd6H4z4IdiAUFSzgbs37nrNrQlzpXUZbGNPiw7D3jw==",
+        "nonce": "AAAAAAAAAAAAAAAf",
+        "tag": "S+uQ57K/asGv2YAsuC3ENA=="
+      },
+      "expect": {
+        "reason": "device_mismatch",
+        "result": "reject"
+      },
+      "name": "reject_device_mismatch",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"FAN_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000031\",\"device\":\"light\",\"timestamp\":1750000100}"
+    },
+    {
+      "envelope": {
+        "algorithm": "AES-256-GCM",
+        "ciphertext": "k8TttjRofyeiwBdIma7kVOdaZImr42eWcDtffDjiB5glm3EP7qL9R4AVbGfzdYIXqXc0T6Lq4oeIcbwWJP1gVJsyLI9bPWUZzZ9R6Dvzws9hScr6RbvkAKbj8K8hmk62ORYN6r5OkxeQ9l7acKs42nLKLY4=",
+        "nonce": "AAAAAAAAAAAAAAAg",
+        "tag": "Fbp2rdmCpAR2AjKhyYsVhw=="
+      },
+      "expect": {
+        "reason": "device_mismatch",
+        "result": "reject"
+      },
+      "name": "reject_unknown_device",
+      "now": 1750000100,
+      "plaintext": "{\"command\":\"LIGHT_ON\",\"command_id\":\"00000000-0000-4000-8000-000000000032\",\"device\":\"toaster\",\"timestamp\":1750000100}"
+    }
+  ]
+}
