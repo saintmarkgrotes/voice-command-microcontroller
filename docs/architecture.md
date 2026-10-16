@@ -106,7 +106,7 @@ app/
     encryption_service.py   AES-256-GCM encrypt and decrypt
     device_state_service.py Simulated device state (thread-safe)
   utils/validators.py       Input validation and normalization
-scripts/                    generate_key.py, create_user.py, decrypt_payload.py
+scripts/                    generate_key.py, create_user.py, decrypt_payload.py, make_test_vectors.py
 tests/                      pytest suite
 ```
 
@@ -184,16 +184,16 @@ Any request returns 401 UNAUTHORIZED while a token was sent
 What is ready:
 
 - The encrypted payload format, including the context string, is fixed and documented in
-  [api.md](api.md) and [security.md](security.md).
+  [api.md](api.md) and [security.md](security.md), and the receiver's exact behavior is
+  specified in [esp32.md](esp32.md) with test vectors for the firmware.
 - Every payload carries a `command_id` and a server `timestamp` so the receiver can reject
   duplicates and old commands.
 - The backend's device state is a clean seam: a future `DeviceStateService` can read real
   device state instead of simulating it.
 
-What is still to decide (Phase 19):
+What is still to decide (options and recommendations are in [esp32.md](esp32.md)):
 
-- How the encrypted payload reaches the ESP32 (for example MQTT or HTTP) and how the ESP32
+- How the encrypted payload reaches the ESP32 (MQTT over TLS is recommended) and how the ESP32
   reports state back.
-- How the shared key is provisioned to the device, and how replay protection is kept on a
-  device with limited memory and no reliable clock.
-- The ESP32 decryption steps, written out for firmware developers.
+- How the key is provisioned to each device (per-device derived keys are recommended).
+- The backend work that follows: sending to the device and reading acknowledgements.

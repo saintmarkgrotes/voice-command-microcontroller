@@ -64,7 +64,7 @@ Plaintext before encryption is compact UTF-8 JSON with sorted keys:
 **Additional authenticated data (AAD):** the ASCII string `smart-home-command-v1`. It is not
 transmitted, but decryption fails unless the receiver supplies the exact same bytes. It ties
 a ciphertext to this protocol and version. If the plaintext format ever changes, bump the
-suffix. The step-by-step ESP32 procedure is planned for Phase 19.
+suffix. The step-by-step ESP32 procedure is in [esp32.md](esp32.md).
 
 ## 4. Nonces
 
@@ -196,8 +196,8 @@ the controls for viewers, but the backend is the authority.
 | Phone to backend uses plain HTTP on the local network       | Acceptable for development only. **Use HTTPS in production.** |
 | No server-side logout or token revocation list              | Tokens expire by themselves; rotate `JWT_SECRET_KEY` for an emergency cut-off |
 | No refresh tokens                                           | Users sign in again after expiry |
-| Replay protection is not enforced by the backend            | Payloads carry `command_id` and `timestamp`; rejecting duplicate or stale commands is the ESP32's job (Phase 19) |
-| Key provisioning to the ESP32 is not designed yet           | Needs a secure one-time method (Phase 19) |
+| Replay protection is not enforced by the backend            | Payloads carry `command_id` and `timestamp`; rejecting duplicate or stale commands is the ESP32's job, with exact rules in [esp32.md](esp32.md)  |
+| Key provisioning to the ESP32 is not decided yet            | Options and a recommendation (per-device keys, flash encryption) are in [esp32.md](esp32.md) |
 | Rate limits are per process and in memory                   | Fine for one server process |
 | Device state is simulated in memory                         | Resets on restart; becomes ESP32 feedback later |
 | Flask development server                                    | Use a production WSGI server and a reverse proxy with HTTPS for real deployments |
@@ -226,6 +226,7 @@ the controls for viewers, but the backend is the authority.
 | Secure token storage, expiry and corrupt data  | `src/services/__tests__/tokenStorage.test.js`               |
 | Session handling and stale 401s                | `src/context/__tests__/AuthContext.test.js`                 |
 | App and backend work together                  | `e2e/api-flow.e2e.test.js`                                  |
+| The ESP32 rules and test vectors match the backend | `backend/tests/test_esp32_vectors.py`                   |
 
 ## 17. Reporting and housekeeping
 

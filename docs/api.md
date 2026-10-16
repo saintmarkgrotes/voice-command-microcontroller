@@ -92,6 +92,7 @@ Initial states: light off, fan off, door closed, pump off.
 
 ## Encrypted payload format (for the future ESP32)
 
-`nonce` (12 bytes), `ciphertext` and `tag` (16 bytes) are Base64-encoded, and the key is
+The rules a receiver must follow, and test vectors to check an implementation against, are in
+[esp32.md](esp32.md).`nonce` (12 bytes), `ciphertext` and `tag` (16 bytes) are Base64-encoded, and the key is
 256-bit. The exact plaintext layout and any associated data are finalized when the
 backend encryption service is built and will be documented here.

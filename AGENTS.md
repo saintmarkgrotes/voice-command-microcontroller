@@ -22,7 +22,10 @@ generic Expo template advice.
 6. **Keep the layers apart.** UI components make no network calls. Screens use hooks, hooks use
    services, services use `src/api/`. Backend routes stay thin; logic lives in `services/`.
 7. **The backend is the authority.** Any check added to the app must also exist in the backend.
-8. **Do not implement ESP32 firmware** until Phase 19 asks for it.
+8. 8. **Do not implement ESP32 firmware** in this repository until the owner asks. The interface is
+   specified in `docs/esp32.md`; its test vectors (`docs/esp32-test-vectors.json`) are regenerated
+   with `python -m scripts.make_test_vectors` from `backend/`, and
+   `backend/tests/test_esp32_vectors.py` fails if they are out of date.
 
 ## Commands
 

@@ -140,7 +140,7 @@ does not have ("open the light"). The word lists are in `src/services/voice/voic
 | App against a live backend | `npm run test:e2e` | yes |
 | Lint | `npx expo lint` | no |
 
-At the time of writing: backend 195 tests, app 232 tests, end-to-end 21 tests.
+At the time of writing: backend 255 tests, app 232 tests, end-to-end 21 tests.
 
 For `npm run test:e2e`, start the backend, create dedicated **test** users (one admin, one
 viewer), and set these in the same PowerShell window, using **single quotes**:
@@ -166,7 +166,7 @@ App.js, index.js, app/        App entry, providers and configuration
 src/                          The mobile app (api, components, context, hooks, screens, services, utils)
 e2e/                          Test of the app against a live backend
 backend/                      Flask API (app, scripts, tests)
-docs/                         architecture.md, api.md, security.md
+docs/                         architecture.md, api.md, security.md, esp32.md, esp32-test-vectors.json
 ```
 
 Details are in [docs/architecture.md](docs/architecture.md).
@@ -176,6 +176,8 @@ Details are in [docs/architecture.md](docs/architecture.md).
 - [docs/architecture.md](docs/architecture.md): how the pieces fit, flows and design decisions
 - [docs/api.md](docs/api.md): every endpoint, request, response and error
 - [docs/security.md](docs/security.md): AES-GCM, tokens, keys, limits and what is not protected yet
+- [docs/esp32.md](docs/esp32.md): what the future ESP32 firmware must do, and
+  [docs/esp32-test-vectors.json](docs/esp32-test-vectors.json), known messages to test it with
 
 ## Troubleshooting
 
@@ -194,7 +196,8 @@ Details are in [docs/architecture.md](docs/architecture.md).
 
 ## Roadmap
 
-- ESP32 firmware and hardware integration (Phase 19 defines the interface)
+- ESP32 firmware and hardware integration (the interface is specified in
+  [docs/esp32.md](docs/esp32.md), with test vectors for the firmware)
 - Real speech recognition (needs a development build; the typed mock input stands in today)
 - HTTPS and a production server setup (see the checklist in `docs/security.md`)
 
