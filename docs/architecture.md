@@ -68,13 +68,15 @@ src/
     useDevices.js           Device states, sending commands, refresh, offline detection
     useVoiceCommand.js      Transcript to parser to command flow
   services/
+    authService.js          Converts login responses into sessions; exposes token transport controls
+    deviceService.js        Loads device states through the API layer
     commandService.js       Builds and validates commands, sends them
     tokenStorage.js         Saves the session in SecureStore (memory fallback)
     voice/                  voiceGrammar.js (words) and commandParser.js (decisions)
   components/               Reusable NativeWind UI pieces (no API calls)
   screens/                  HomeScreen, LoginScreen, SessionLoadingScreen
   navigation/AppNavigator.js  Shows Loading, Login or Home depending on sign-in state
-  utils/                    Friendly error messages and voice messages
+  utils/                    Device defaults/view models, friendly error messages and voice messages
 e2e/                        Test that runs the app's API layer against a live backend
 ```
 
@@ -103,6 +105,7 @@ app/
     rate_limit.py           In-memory sliding-window limiter
   services/                 Business logic, no Flask objects
     command_service.py      Adds id and timestamp, encrypts, updates state
+    login_service.py        Login lockout, credential checks and token response
     encryption_service.py   AES-256-GCM encrypt and decrypt
     device_state_service.py Simulated device state (thread-safe)
   utils/validators.py       Input validation and normalization
@@ -118,7 +121,7 @@ refuses to start with missing or weak secrets; every failure goes through `error
 **Sign in**
 
 ```text
-LoginScreen → AuthContext.signIn → POST /api/auth/login
+LoginScreen → AuthContext.signIn → authService.authenticate → POST /api/auth/login
    backend: validate body → check lockout → check password hash → issue token
    app: store token in SecureStore → set Authorization header → show Home
 ```
@@ -144,6 +147,7 @@ MockVoiceInput → useVoiceCommand.submitTranscript → parseVoiceCommand → "L
 
 ```text
 Pull-to-refresh, app returns to foreground, or first load → GET /api/status
+  useDevices → deviceService.getDeviceStates → API status endpoint
   A refresh that started before a command and finishes after it is ignored,
   so it cannot undo the command.
 ```
@@ -197,3 +201,19 @@ What is still to decide (options and recommendations are in [esp32.md](esp32.md)
   reports state back.
 - How the key is provisioned to each device (per-device derived keys are recommended).
 - The backend work that follows: sending to the device and reading acknowledgements.
+
+## 9. Maintenance boundaries
+
+- Keep asynchronous UI lifecycle handling in hooks/providers and API access in services.
+  Device defaults and view models live in `src/utils/deviceState.js`; the mock and dashboard
+  create separate state maps from the same defaults.
+- Derive the sending indicator from the pending command; the synchronous in-flight guard
+  still prevents two taps from starting concurrent commands.
+- Backend login policy lives in `LoginService`. The route only validates the request and
+  formats the HTTP response. Command rate-limit checks and recording share one lock.
+- The mock backend, typed voice input, health endpoint client and decryption scripts are
+  still used for development and verification. They are not dead code.
+- `global.css` contains only NativeWind's required Tailwind directives. Keep this build input;
+  write component styling with `className`.
+- Unit and live-backend Jest suites share the transform configuration in `package.json`.
+  Install `backend/requirements-dev.txt` for tests and `backend/requirements.txt` for runtime.

@@ -27,7 +27,7 @@ Phone (React Native)  ──HTTP + token──►  Flask backend  ──encrypte
 
 ## What you need
 
-- **Node.js** 20 LTS or newer, and npm
+- **Node.js** 22.13+ (22.x) or 24.3+, and npm
 - **Python** 3.10 or newer (for the backend)
 - The **Expo Go** app on your phone, or an Android emulator / iOS simulator
 - Your phone and computer on the **same Wi-Fi** (when using the real backend on a phone)
@@ -201,6 +201,19 @@ Details are in [docs/architecture.md](docs/architecture.md).
   [docs/esp32.md](docs/esp32.md), with test vectors for the firmware)
 - Real speech recognition (needs a development build; the typed mock input stands in today)
 - HTTPS and a production server setup (see the checklist in `docs/security.md`)
+
+## Deployment notes
+
+The backend still simulates device state and the voice input is typed. Follow the
+[production checklist](docs/security.md#15-before-real-use-checklist) before hosting the API.
+Device state and rate limits are held in one process; multiple workers would have separate
+state and limits.
+
+`test-renderer` is constrained to `~1.2.0` to match the app's React 19.2 release and
+`react-reconciler` 0.33.x. Keep the tilde range: a caret would allow the 1.3.x renderer,
+which targets React 19.3. See the maintainer's
+[compatibility guide](https://github.com/mdjastrzebski/test-renderer/blob/main/docs/versioning.md)
+when changing React versions. Use `npm ci` to install the committed dependency versions.
 
 ## License
 
