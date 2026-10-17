@@ -152,7 +152,8 @@ the controls for viewers, but the backend is the authority.
   even the correct password is refused (`429`, with `Retry-After`). A successful login resets
   only the username counter, so an attacker cannot clear the IP counter by logging in to their
   own account between guesses.
-- **Commands:** 30 per minute per user.
+- **Commands:** 30 per minute per user. Checking the limit and recording an allowed command
+  happen under one lock, so concurrent requests cannot both take the final available slot.
 - Limits live in memory: they reset on restart and are not shared between processes. Use a
   shared store (for example Redis) if the backend ever runs with several workers. Locking a
   username can also be used to lock out its real owner for a few minutes; that is the usual

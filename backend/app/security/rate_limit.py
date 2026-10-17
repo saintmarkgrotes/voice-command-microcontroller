@@ -36,30 +36,39 @@ class RateLimiter:
             return None
         return events
 
+    # Internal helpers run under the caller's lock, with one timestamp per operation.
+    def _retry_after(self, key, now):
+        events = self._recent(key, now)
+        if events is None or len(events) < self._max:
+            return 0
+        return max(1, math.ceil(events[0] + self._window - now))
+
+    def _record(self, key, now):
+        self._events.setdefault(key, deque()).append(now)
+        while len(self._events) > MAX_TRACKED_KEYS:
+            self._events.pop(next(iter(self._events)))  # drop the oldest key
+
     def retry_after(self, key):
         """Seconds until `key` may act again (0 if it may act now). Records nothing."""
         with self._lock:
-            now = self._clock()
-            events = self._recent(key, now)
-            if events is None or len(events) < self._max:
-                return 0
-            return max(1, math.ceil(events[0] + self._window - now))
+            return self._retry_after(key, self._clock())
 
     def hit(self, key):
         """Record one event for `key`."""
         with self._lock:
             now = self._clock()
             self._recent(key, now)
-            self._events.setdefault(key, deque()).append(now)
-            while len(self._events) > MAX_TRACKED_KEYS:
-                self._events.pop(next(iter(self._events)))  # drop the oldest key
+            self._record(key, now)
 
     def check_and_hit(self, key):
         """Allow and record the event, or return the seconds to wait (nothing recorded)."""
-        wait = self.retry_after(key)
-        if wait == 0:
-            self.hit(key)
-        return wait
+        # Checking and recording must be atomic across concurrent requests.
+        with self._lock:
+            now = self._clock()
+            wait = self._retry_after(key, now)
+            if wait == 0:
+                self._record(key, now)
+            return wait
 
     def reset(self, key):
         with self._lock:

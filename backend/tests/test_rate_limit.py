@@ -1,3 +1,6 @@
+import threading
+from concurrent.futures import ThreadPoolExecutor
+
 import pytest
 
 from app.errors import RateLimitedError
@@ -62,6 +65,37 @@ def test_retry_after_does_not_record():
     limiter = RateLimiter(1, 60, clock=FakeClock())
     for _ in range(5):
         assert limiter.retry_after("k") == 0
+
+
+def test_concurrent_commands_cannot_both_take_the_last_slot():
+    limiter = RateLimiter(1, 60, clock=FakeClock())
+
+    class YieldAfterUnlock:
+        """Make both threads leave their first critical section before proceeding.
+
+        A split check/record implementation lets both checks pass under this schedule.
+        An atomic implementation has already recorded the first command.
+        """
+
+        def __init__(self):
+            self.lock = threading.Lock()
+            self.barrier = threading.Barrier(2, timeout=5)
+            self.thread = threading.local()
+
+        def __enter__(self):
+            self.lock.acquire()
+
+        def __exit__(self, *args):
+            self.lock.release()
+            if not getattr(self.thread, "yielded", False):
+                self.thread.yielded = True
+                self.barrier.wait()
+
+    limiter._lock = YieldAfterUnlock()
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(limiter.check_and_hit, ["user:admin"] * 2))
+
+    assert sorted(results) == [0, 60]
 
 
 def test_enforce_raises_429_with_retry_after():
