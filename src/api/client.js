@@ -1,10 +1,10 @@
-import axios from "axios";
+import { create } from "axios";
 
 import config from "../../app/config";
 import { normalizeApiError } from "./errors";
 import { notifyUnauthorized } from "./session";
 
-const client = axios.create({
+const client = create({
   baseURL: config.apiBaseUrl,
   timeout: config.requestTimeoutMs,
   headers: {

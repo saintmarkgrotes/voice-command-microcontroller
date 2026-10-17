@@ -25,7 +25,8 @@
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "test:e2e": "jest --config jest.e2e.config.js"
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "lint": "expo lint"
   },
   "private": true,
   "devDependencies": {
