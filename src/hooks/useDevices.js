@@ -2,10 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 
 import config from "../../app/config";
-import { getStatus } from "../api/status";
-import { COMMAND_DEFINITIONS, DEVICE_CONFIG } from "../constants/deviceConfig";
-import { DEVICE_TYPE_LIST } from "../constants/deviceTypes";
 import { getResultingState, submitCommand } from "../services/commandService";
+import { getDeviceStates } from "../services/deviceService";
+import { buildInitialStates, toDeviceViews } from "../utils/deviceState";
 import { getUserMessage } from "../utils/errorMessages";
 
 const CONNECTION_ERROR_CODES = [
@@ -14,38 +13,11 @@ const CONNECTION_ERROR_CODES = [
   "SERVICE_UNAVAILABLE",
 ];
 
-function buildInitialStates() {
-  return DEVICE_TYPE_LIST.reduce((states, deviceId) => {
-    states[deviceId] = DEVICE_CONFIG[deviceId].defaultState;
-    return states;
-  }, {});
-}
-
-// Combines static config with current state into what the UI renders.
-function toDeviceView(deviceId, state) {
-  const deviceConfig = DEVICE_CONFIG[deviceId];
-
-  return {
-    id: deviceId,
-    name: deviceConfig.name,
-    icon: deviceConfig.icon,
-    state,
-    tone:
-      state === deviceConfig.activeState ? deviceConfig.activeTone : "inactive",
-    actions: deviceConfig.actions.map((action) => ({
-      label: action.label,
-      command: action.command,
-      selected: COMMAND_DEFINITIONS[action.command].resultState === state,
-    })),
-  };
-}
-
 // API-backed device state. Device state changes ONLY after the backend
 // confirms a command; a failed request leaves the UI untouched.
 export default function useDevices() {
   const [states, setStates] = useState(buildInitialStates);
   const [connection, setConnection] = useState("checking"); // 'checking' | 'connected' | 'disconnected'
-  const [isSending, setIsSending] = useState(false);
   const [pendingCommand, setPendingCommand] = useState(null); // the command being sent right now
   const [isRefreshing, setIsRefreshing] = useState(false); // true during pull-to-refresh
   const [lastResult, setLastResult] = useState(null);
@@ -63,7 +35,7 @@ export default function useDevices() {
 
     const run = async () => {
       try {
-        const remoteStates = await getStatus();
+        const remoteStates = await getDeviceStates();
         if (!isMounted.current) return;
         // If a command finished while this request was in flight, the answer may be
         // older than what the person just did. Keep the newer states on screen.
@@ -118,7 +90,6 @@ export default function useDevices() {
   const sendCommand = useCallback(async (command) => {
     if (inFlight.current) return; // ignore rapid double taps
     inFlight.current = true;
-    setIsSending(true);
     setPendingCommand(command);
 
     try {
@@ -150,20 +121,15 @@ export default function useDevices() {
     } finally {
       inFlight.current = false;
       if (isMounted.current) {
-        setIsSending(false);
         setPendingCommand(null);
       }
     }
   }, []);
 
-  const devices = DEVICE_TYPE_LIST.map((deviceId) =>
-    toDeviceView(deviceId, states[deviceId]),
-  );
-
   return {
-    devices,
+    devices: toDeviceViews(states),
     connection,
-    isSending,
+    isSending: pendingCommand !== null,
     pendingCommand,
     isRefreshing,
     lastResult,

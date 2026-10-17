@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { AppState } from "react-native";
 
-import { getStatus } from "../../api/status";
+import { getDeviceStates } from "../../services/deviceService";
 import { submitCommand } from "../../services/commandService";
 import useDevices from "../useDevices";
 
@@ -9,7 +9,7 @@ jest.mock("../../../app/config", () => ({
   __esModule: true,
   default: { apiBaseUrl: "http://test", requestTimeoutMs: 1000, useMockApi: false },
 }));
-jest.mock("../../api/status", () => ({ getStatus: jest.fn() }));
+jest.mock("../../services/deviceService", () => ({ getDeviceStates: jest.fn() }));
 jest.mock("../../services/commandService", () => ({
   ...jest.requireActual("../../services/commandService"),
   submitCommand: jest.fn(),
@@ -49,7 +49,7 @@ async function mount() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  getStatus.mockResolvedValue({ ...STATES });
+  getDeviceStates.mockResolvedValue({ ...STATES });
   removeListener = jest.fn();
   appStateHandler = undefined;
   appStateSpy = jest.spyOn(AppState, "addEventListener").mockImplementation((_type, handler) => {
@@ -62,18 +62,18 @@ afterEach(() => appStateSpy.mockRestore());
 
 describe("loading", () => {
   test("loads device states from the backend", async () => {
-    getStatus.mockResolvedValue({ ...STATES, light: "on", door: "open" });
+    getDeviceStates.mockResolvedValue({ ...STATES, light: "on", door: "open" });
     const { result } = await mount();
 
     expect(result.current.connection).toBe("connected");
     expect(stateOf(result, "light")).toBe("on");
     expect(stateOf(result, "door")).toBe("open");
-    expect(getStatus).toHaveBeenCalledTimes(1);
+    expect(getDeviceStates).toHaveBeenCalledTimes(1);
     expect(result.current).toMatchObject({ isRefreshing: false, isSending: false, pendingCommand: null });
   });
 
   test("a failed load shows offline and a friendly message", async () => {
-    getStatus.mockRejectedValue(apiError("NETWORK_ERROR"));
+    getDeviceStates.mockRejectedValue(apiError("NETWORK_ERROR"));
     const { result } = await mount();
 
     expect(result.current.connection).toBe("disconnected");
@@ -83,7 +83,7 @@ describe("loading", () => {
   });
 
   test("each device offers its two actions, the current one selected", async () => {
-    getStatus.mockResolvedValue({ ...STATES, light: "on" });
+    getDeviceStates.mockResolvedValue({ ...STATES, light: "on" });
     const { result } = await mount();
     const light = result.current.devices.find((d) => d.id === "light");
     expect(light.actions.map((a) => [a.command, a.selected])).toEqual([
@@ -97,7 +97,7 @@ describe("pull-to-refresh", () => {
   test("shows the spinner while loading, then the new states", async () => {
     const { result } = await mount();
     const pending = deferred();
-    getStatus.mockReturnValue(pending.promise);
+    getDeviceStates.mockReturnValue(pending.promise);
 
     let refreshing;
     await act(() => {
@@ -114,9 +114,9 @@ describe("pull-to-refresh", () => {
   });
 
   test("offline: spinner stops, last known states stay, banner state is set", async () => {
-    getStatus.mockResolvedValue({ ...STATES, light: "on" });
+    getDeviceStates.mockResolvedValue({ ...STATES, light: "on" });
     const { result } = await mount();
-    getStatus.mockRejectedValue(apiError("TIMEOUT"));
+    getDeviceStates.mockRejectedValue(apiError("TIMEOUT"));
 
     await act(() => result.current.onRefresh());
 
@@ -124,16 +124,16 @@ describe("pull-to-refresh", () => {
     expect(result.current.connection).toBe("disconnected");
     expect(stateOf(result, "light")).toBe("on");
 
-    getStatus.mockResolvedValue({ ...STATES, light: "on" });
+    getDeviceStates.mockResolvedValue({ ...STATES, light: "on" });
     await act(() => result.current.onRefresh());
     expect(result.current.connection).toBe("connected");
   });
 
   test("two refreshes at once share one request", async () => {
     const { result } = await mount();
-    getStatus.mockClear();
+    getDeviceStates.mockClear();
     const pending = deferred();
-    getStatus.mockReturnValue(pending.promise);
+    getDeviceStates.mockReturnValue(pending.promise);
 
     let first;
     let second;
@@ -142,7 +142,7 @@ describe("pull-to-refresh", () => {
       second = result.current.refresh();
     });
     expect(second).toBe(first);
-    expect(getStatus).toHaveBeenCalledTimes(1);
+    expect(getDeviceStates).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       pending.resolve({ ...STATES });
@@ -154,7 +154,7 @@ describe("pull-to-refresh", () => {
     const { result } = await mount();
     const sending = deferred();
     submitCommand.mockReturnValue(sending.promise);
-    getStatus.mockClear();
+    getDeviceStates.mockClear();
 
     let command;
     await act(() => {
@@ -162,7 +162,7 @@ describe("pull-to-refresh", () => {
     });
     await act(() => result.current.onRefresh());
 
-    expect(getStatus).not.toHaveBeenCalled();
+    expect(getDeviceStates).not.toHaveBeenCalled();
     expect(result.current.isRefreshing).toBe(false);
 
     await act(async () => {
@@ -176,7 +176,7 @@ describe("the refresh race", () => {
   test("a slow refresh that started BEFORE a command cannot undo it", async () => {
     const { result } = await mount();
     const slowRefresh = deferred();
-    getStatus.mockReturnValue(slowRefresh.promise); // will answer with the OLD state
+    getDeviceStates.mockReturnValue(slowRefresh.promise); // will answer with the OLD state
     submitCommand.mockResolvedValue(commandResult("LIGHT_ON", "light"));
 
     let refreshing;
@@ -195,7 +195,7 @@ describe("the refresh race", () => {
     expect(result.current.connection).toBe("connected");
 
     // The next refresh starts after the command, so its answer is trusted.
-    getStatus.mockResolvedValue({ ...STATES, light: "on" });
+    getDeviceStates.mockResolvedValue({ ...STATES, light: "on" });
     await act(() => result.current.refresh());
     expect(stateOf(result, "light")).toBe("on");
   });
@@ -286,16 +286,16 @@ describe("sending commands", () => {
 describe("returning to the app", () => {
   test("refreshes when the app comes back to the foreground, and only then", async () => {
     await mount();
-    getStatus.mockClear();
+    getDeviceStates.mockClear();
 
     await act(() => appStateHandler("background"));
-    expect(getStatus).not.toHaveBeenCalled();
+    expect(getDeviceStates).not.toHaveBeenCalled();
 
     await act(() => appStateHandler("active"));
-    expect(getStatus).toHaveBeenCalledTimes(1);
+    expect(getDeviceStates).toHaveBeenCalledTimes(1);
 
     await act(() => appStateHandler("active"));
-    expect(getStatus).toHaveBeenCalledTimes(1);
+    expect(getDeviceStates).toHaveBeenCalledTimes(1);
   });
 });
 

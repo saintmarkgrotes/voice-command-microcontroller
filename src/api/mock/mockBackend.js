@@ -1,8 +1,6 @@
-import {
-  COMMAND_DEFINITIONS,
-  DEVICE_CONFIG,
-} from "../../constants/deviceConfig";
+import { COMMAND_DEFINITIONS } from "../../constants/deviceConfig";
 import { DEVICE_TYPE_LIST } from "../../constants/deviceTypes";
+import { buildInitialStates } from "../../utils/deviceState";
 import { createApiError } from "../errors";
 
 // In-memory imitation of the Flask API, following docs/api.md.
@@ -14,10 +12,7 @@ const hasOwn = (object, key) =>
   Object.prototype.hasOwnProperty.call(object, key);
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const deviceStates = DEVICE_TYPE_LIST.reduce((states, deviceId) => {
-  states[deviceId] = DEVICE_CONFIG[deviceId].defaultState;
-  return states;
-}, {});
+const deviceStates = buildInitialStates();
 
 function fakeBase64(byteLength) {
   let binary = "";
