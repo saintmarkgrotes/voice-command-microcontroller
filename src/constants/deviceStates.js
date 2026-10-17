@@ -1,4 +1,4 @@
-// Possible device states. They match the state names in the planned GET /api/status response.
+// Possible device states, matching the GET /api/status response.
 export const DEVICE_STATES = Object.freeze({
   ON: "on",
   OFF: "off",

@@ -1,5 +1,5 @@
 // Maps error codes to user-friendly text. Raw server messages and technical
-// details are never shown. Phase 15 will refine the wording and presentation.
+// details are never shown.
 
 const FALLBACK = "⚠️ Something went wrong. Please try again.";
 const NOT_SUPPORTED = "⚠️ That command is not supported.";
