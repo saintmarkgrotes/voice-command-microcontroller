@@ -9,9 +9,11 @@ import {
 } from "react";
 
 import config from "../../app/config";
-import { login as loginRequest } from "../api/auth";
-import { setAuthToken } from "../api/client";
-import { setUnauthorizedHandler } from "../api/session";
+import {
+  authenticate,
+  setAuthToken,
+  setUnauthorizedHandler,
+} from "../services/authService";
 import {
   clearSession,
   isSessionExpired,
@@ -107,12 +109,7 @@ export function AuthProvider({ children }) {
   // Throws an ApiError (INVALID_CREDENTIALS, RATE_LIMITED, NETWORK_ERROR, ...) on failure.
   const signIn = useCallback(
     async (username, password) => {
-      const result = await loginRequest(username, password);
-      const session = {
-        accessToken: result.accessToken,
-        expiresAt: Date.now() + result.expiresIn * 1000,
-        user: result.user,
-      };
+      const session = await authenticate(username, password);
       startSession(session);
       await saveSession(session);
     },
