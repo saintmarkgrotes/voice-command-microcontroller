@@ -51,7 +51,7 @@ and `cp`)
 cd backend
 python -m venv venv
 venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 copy .env.example .env
 ```
 
@@ -140,7 +140,8 @@ does not have ("open the light"). The word lists are in `src/services/voice/voic
 | App against a live backend | `npm run test:e2e` | yes |
 | Lint | `npx expo lint` | no |
 
-At the time of writing: backend 255 tests, app 232 tests, end-to-end 21 tests.
+`backend/requirements-dev.txt` includes the runtime dependencies and pytest. Deployments
+only need `backend/requirements.txt` plus the production WSGI server chosen for hosting.
 
 For `npm run test:e2e`, start the backend, create dedicated **test** users (one admin, one
 viewer), and set these in the same PowerShell window, using **single quotes**:
