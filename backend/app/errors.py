@@ -46,28 +46,10 @@ class ForbiddenError(ApiError):
     message = "You do not have permission to do that."
 
 
-class NotFoundError(ApiError):
-    status_code = 404
-    code = "NOT_FOUND"
-    message = "Resource not found."
-
-
-class ConflictError(ApiError):
-    status_code = 409
-    code = "CONFLICT"
-    message = "The request conflicts with the current state."
-
-
 class RateLimitedError(ApiError):
     status_code = 429
     code = "RATE_LIMITED"
     message = "Too many requests."
-
-
-class ServiceUnavailableError(ApiError):
-    status_code = 503
-    code = "SERVICE_UNAVAILABLE"
-    message = "The service is temporarily unavailable."
 
 
 # Framework-generated HTTP errors (unknown route, wrong method, ...) -> contract codes.

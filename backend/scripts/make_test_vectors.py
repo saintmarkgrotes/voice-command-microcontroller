@@ -75,7 +75,7 @@ def generate():
         body = {k: v for k, v in body.items() if v is not None}
         return json.dumps(body, separators=(",", ":"), sort_keys=True).encode()
 
-    def message(name, expect, plaintext_bytes=None, now=NOW, key=TEST_KEY, aad=AAD, note=None, **kw):
+    def message(name, expect, plaintext_bytes, now=NOW, key=TEST_KEY, aad=AAD, note=None):
         envelope = encrypt(plaintext_bytes, next_nonce(), key=key, aad=aad)
         entry = {"name": name, "now": now, "envelope": envelope, "expect": expect}
         if plaintext_bytes is not None and plaintext_bytes[:1] == b"{":
