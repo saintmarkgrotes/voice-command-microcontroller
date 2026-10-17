@@ -12,6 +12,7 @@ from app.security.rate_limit import RateLimiter
 from app.services.command_service import CommandService
 from app.services.device_state_service import DeviceStateService
 from app.services.encryption_service import EncryptionService, InvalidKeyError
+from app.services.login_service import LoginService
 
 
 def create_app(config_class=Config):
@@ -47,6 +48,9 @@ def create_app(config_class=Config):
     )
     app.extensions["login_limiter"] = RateLimiter(
         app.config["LOGIN_MAX_FAILURES"], app.config["LOGIN_WINDOW_SECONDS"]
+    )
+    app.extensions["login_service"] = LoginService(
+        auth_service, app.extensions["login_limiter"]
     )
     app.extensions["command_limiter"] = RateLimiter(
         app.config["COMMAND_RATE_LIMIT"], app.config["COMMAND_RATE_WINDOW_SECONDS"]
